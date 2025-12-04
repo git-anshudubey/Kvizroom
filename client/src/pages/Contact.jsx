@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Lenis from '@studio-freight/lenis';
 import { Link } from 'react-router-dom';
 import './Contact.css';
 import { toast } from 'react-toastify';
 import axios from 'axios'; // ✅ Added
 
 const Contact = () => {
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
   const [form, setForm] = useState({
     name: '',
     email: '',

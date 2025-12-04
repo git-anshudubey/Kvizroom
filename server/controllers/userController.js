@@ -75,11 +75,14 @@ const loginUser = async (req, res) => {
 
     // Respond with token
     res.json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      photo: user.photo,
-      token: generateToken(user._id),
+      _token: generateToken(user._id),
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        photo: user.photo
+      }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

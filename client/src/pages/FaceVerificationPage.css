@@ -1,12 +1,12 @@
 .face-verification-container {
   min-height: 100vh;
-  background: linear-gradient(to right, #141e30, #243b55);
+  background:  linear-gradient(135deg, #d4fcd2, #eec3b0);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 30px 15px;
-  color: white;
+  color: black;
   text-align: center;
 }
 

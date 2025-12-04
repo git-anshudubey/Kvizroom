@@ -1,16 +1,31 @@
-import React, { useState } from 'react';
+// src/pages/Login.jsx
+import React, { useState, useEffect, useContext } from 'react';
+import Lenis from '@studio-freight/lenis';
 import './Login.css';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode'; // ✅ import jwt-decode
+import { jwtDecode } from 'jwt-decode';
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const [emailLogin, setEmailLogin] = useState('');
   const [passwordLogin, setPasswordLogin] = useState('');
-
   const [showPopup, setShowPopup] = useState(false);
   const [step, setStep] = useState(1);
   const [resetEmail, setResetEmail] = useState('');
@@ -26,25 +41,41 @@ const Login = () => {
     }
 
     try {
+      console.log("📤 Sending login request with:", {
+        email: emailLogin,
+        password: passwordLogin
+      });
+
       const response = await axios.post('http://localhost:5000/api/users/login', {
         email: emailLogin,
         password: passwordLogin,
       });
 
-      const { token } = response.data;
-      const decoded = jwtDecode(token); // ✅ decode token to get role and email
+      console.log("✅ Login response:", response.data);
 
-      // ✅ Save user data
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', decoded.role);
-      localStorage.setItem('email', decoded.email);
+      // backend returns {_token: "...", user: {...}} (based on your backend)
+      const { _token: token, user } = response.data;
+
+      // If backend returned token under `token` instead of `_token` use:
+      // const { token, user } = response.data;
+
+      // Save into context (and localStorage inside context)
+      login(user, token);
 
       toast.success("Login successful!");
 
-      // ✅ Redirect based on role
-      decoded.role === 'admin' ? navigate('/admin') : navigate('/dashboard');
+      // redirect to home (or admin area if user.role === 'admin')
+      const role = user?.role || (token ? (jwtDecode(token).role) : null);
+      role === 'admin' ? navigate('/admin') : navigate('/');
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+      console.error("❌ Login failed:", error);
+      console.error("Error response:", error.response);
+
+      const errMsg =
+        error.response?.data?.message ||
+        error.response?.data ||
+        "Login failed";
+      toast.error(errMsg);
     }
   };
 

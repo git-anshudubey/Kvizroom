@@ -1,14 +1,27 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import Lenis from '@studio-freight/lenis';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from "axios";
 import Webcam from "react-webcam";
 import "./ExamPage.css";
-import * as blazeface from "@tensorflow-models/blazeface";
-import * as tf from "@tensorflow/tfjs";
+// Removed blazeface and tf imports
 import { toast } from "react-toastify";
 import { io } from 'socket.io-client';
+import * as faceapi from 'face-api.js';
+
 
 const ExamPage = () => {
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
   const { testId } = useParams();
   const navigate = useNavigate();
   const [test, setTest] = useState(null);
@@ -18,6 +31,7 @@ const ExamPage = () => {
   const [isDuplicateTab, setIsDuplicateTab] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
   const [testCompleted, setTestCompleted] = useState(false);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
   const webcamRef = useRef(null);
   const tabId = useRef(`${Date.now()}-${Math.random()}`);
   const email = localStorage.getItem("email");
@@ -186,35 +200,60 @@ const ExamPage = () => {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, [testStarted, testCompleted]);
 
+  // ======== New face-api.js based face detection ========
+
   useEffect(() => {
-    if (!testStarted) return;
-    let model, interval;
-    const loadModelAndStart = async () => {
-      model = await blazeface.load();
-      interval = setInterval(async () => {
-        if (
-          webcamRef.current &&
-          webcamRef.current.video &&
-          webcamRef.current.video.readyState === 4
-        ) {
-          const video = webcamRef.current.video;
-          const predictions = await model.estimateFaces(video, false);
-          if (predictions.length === 0) {
+    // Load face-api models once at mount
+    const MODEL_URL = process.env.PUBLIC_URL + '/models';
+
+    Promise.all([
+      faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+    ]).then(() => {
+      setModelsLoaded(true);
+    }).catch(e => {
+      toast.error("Failed to load face recognition models.");
+      console.error(e);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!testStarted || !modelsLoaded) return;
+
+    const interval = setInterval(async () => {
+      if (
+        webcamRef.current &&
+        webcamRef.current.video &&
+        webcamRef.current.video.readyState === 4
+      ) {
+        const video = webcamRef.current.video;
+        try {
+          const detections = await faceapi
+            .detectAllFaces(video, new faceapi.SsdMobilenetv1Options())
+            .withFaceLandmarks();
+
+          if (detections.length === 0) {
             toast.error("⚠️ No face detected.");
             logInactivity("No face detected");
-          } else if (predictions.length > 1) {
+          } else if (detections.length > 1) {
             toast.error("⚠️ Multiple faces detected.");
             logInactivity("Multiple faces detected");
-          } else if ((predictions[0].landmarks || []).length < 5) {
+          } else if (detections[0].landmarks.positions.length < 5) {
             toast.warn("⚠️ Face unclear.");
             logInactivity("Face unclear or covered");
           }
+        } catch (err) {
+          console.error("Face detection error:", err);
         }
-      }, 3000);
-    };
-    loadModelAndStart();
+      }
+    }, 3000);
+
     return () => clearInterval(interval);
-  }, [testStarted]);
+  }, [testStarted, modelsLoaded]);
+
+  // ======== End of face-api.js face detection ========
+
 
   useEffect(() => {
     if (!testStarted) return;

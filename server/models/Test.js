@@ -1,5 +1,23 @@
 const mongoose = require('mongoose');
 
+const optionSchema = new mongoose.Schema({
+  id: String,       // UUID for each option
+  text: String,
+  isCorrect: Boolean,
+});
+
+const questionSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  type: { type: String, required: true },
+  options: [
+    {
+      text: String,
+      isCorrect: Boolean,
+    },
+  ],
+});
+
+
 const testSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -17,24 +35,23 @@ const testSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  questions: [questionSchema], // Added for storing questions and options
   studentEmails: {
     type: [String],
-    default: []
+    default: [],
   },
   inviteCode: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   emails: {
-    type: [String]
+    type: [String],
   },
-
   invitedEmails: {  // for total invited emails
     type: [String],
     default: [],
   },
-
   attendedEmails: { // for emails of students who attended the test
     type: [String],
     default: [],
@@ -47,14 +64,12 @@ const testSchema = new mongoose.Schema({
     },
   ],
   inactivityLogs: [
-  {
-    email: String,
-    name: String,
-    timestamp: String,
-  },
-],
-
-
+    {
+      email: String,
+      name: String,
+      timestamp: String,
+    },
+  ],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Test', testSchema);

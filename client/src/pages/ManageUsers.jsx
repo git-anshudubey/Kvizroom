@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Lenis from '@studio-freight/lenis';
 import './ManageUsers.css';
 import BackToDashboard from '../components/BackToDashboard/BackToDashboard';
 import { toast } from 'react-toastify';
@@ -6,6 +7,17 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 export default function ManageUsers() {
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
   const { testId } = useParams();
   const [students, setStudents] = useState([]);
   const [activeModal, setActiveModal] = useState(null);

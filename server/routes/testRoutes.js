@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const multer = require("multer");
 const {
   createTest,
   updateTest,
@@ -16,8 +17,20 @@ const {
 } = require('../controllers/testController');
 const { protect } = require('../middleware/authMiddleware');
 
+// Multer storage config
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // store in uploads folder
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
 // Routes
-router.post('/', protect, createTest);
+router.post('/', protect, upload.any(), createTest); // ✅ single unified route for createTest with file upload
 router.get('/', protect, getAllTests);
 router.put('/:id', protect, updateTest);
 router.delete('/:id', protect, deleteTest);
@@ -29,7 +42,5 @@ router.post('/:id/mark-attended', markStudentAttended);
 router.post('/:testId/log-inactivity', logInactivity);
 router.get('/:testId/activity', getStudentActivity);
 router.post('/:testId/remove-student', removeStudentPermanently);
-
-
 
 module.exports = router;

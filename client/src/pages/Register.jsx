@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import Lenis from '@studio-freight/lenis';
 import axios from 'axios';
 import './Register.css';
 import { useNavigate, Link } from 'react-router-dom';
@@ -6,6 +7,17 @@ import Webcam from 'react-webcam';
 import { toast } from 'react-toastify';
 
 const Register = () => {
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
   const navigate = useNavigate();
   const webcamRef = useRef(null);
   const [capturedImage, setCapturedImage] = useState(null);

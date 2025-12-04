@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Lenis from '@studio-freight/lenis';
 import './Reports.css';
 import BackToDashboard from '../components/BackToDashboard/BackToDashboard';
 import { useParams } from "react-router-dom";
@@ -11,6 +12,17 @@ const emailToName = {
 };
 
 export default function Reports() {
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
   const { testId } = useParams();
   const [invitedEmails, setInvitedEmails] = useState([]);
   const [attendedEmails, setAttendedEmails] = useState([]);

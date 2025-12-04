@@ -28,6 +28,8 @@ app.use(express.json({ limit: '10mb' }));
 // ✅ Static folders for descriptors and models
 app.use('/faces', express.static(path.join(__dirname, 'faces')));
 app.use('/models', express.static(path.join(__dirname, 'models'))); // optional
+app.use("/uploads", express.static("uploads"));
+
 
 // ✅ API Routes
 app.use('/api/users', userRoutes);
@@ -36,6 +38,12 @@ app.use('/api/proctor', proctorRoutes);
 app.use('/api', contactRoutes);
 
 
+// ✅ Face verification test route
+app.post('/api/face/verify', (req, res) => {
+  console.log("Received face verification request:", req.body);
+  // For now, always return success (testing only)
+  res.json({ success: true });
+});
 
 app.get('/', (req, res) => {
   res.send('Welcome to Muhafiz Backend');
@@ -69,5 +77,5 @@ io.on('connection', (socket) => {
 
 // ✅ Start the server
 server.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

@@ -3,31 +3,77 @@ const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
 const generateInviteCode = require('../utils/generateInviteCode');
+const path = require('path');
+const multer = require('multer');
+
+
+
+
+// Storage config for uploaded files
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/tests"); // make sure this folder exists
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      Date.now() + "-" + Math.round(Math.random() * 1e9) + path.extname(file.originalname)
+    );
+  }
+});
+
+const upload = multer({ storage });
 
 // Create Test
 const createTest = async (req, res) => {
-  const { title, formLink, duration, startTime } = req.body;
-
-  if (!title || !formLink || !duration || !startTime) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
   try {
+    const { title, duration, startTime, questions } = req.body;
+
+    if (!title || !duration || !startTime) {
+      return res.status(400).json({ message: 'Title, duration, and start time are required' });
+    }
+
+    // Validate questions array
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ message: 'At least one question is required' });
+    }
+
+    // Generate unique invite code
     let inviteCode, existing;
     do {
       inviteCode = generateInviteCode();
       existing = await Test.findOne({ inviteCode });
     } while (existing);
 
-    const test = new Test({ title, formLink, duration, startTime, inviteCode });
+    // Handle uploaded files (Multer will add them to req.files)
+    const processedQuestions = questions.map((q, index) => {
+      const attachment = req.files?.find(file => file.fieldname === `questionFile_${index}`);
+      return {
+        ...q,
+        attachmentUrl: attachment ? `/uploads/${attachment.filename}` : null
+      };
+    });
+
+    const test = new Test({
+      title,
+      duration,
+      startTime,
+      inviteCode,
+      questions: processedQuestions
+    });
+
     await test.save();
 
-    res.status(201).json({ message: 'Test created successfully', test });
+    res.status(201).json({
+      message: 'Test created successfully',
+      test
+    });
   } catch (error) {
     console.error('Error creating test:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 // Get All Tests
 const getAllTests = async (req, res) => {
