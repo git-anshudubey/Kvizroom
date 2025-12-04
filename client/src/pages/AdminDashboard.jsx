@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Lenis from '@studio-freight/lenis';
 import { useNavigate, Link } from 'react-router-dom';
 import './AdminDashboard.css';
 import axios from 'axios';
@@ -16,6 +17,17 @@ export default function AdminDashboard() {
   const [recentLogs, setRecentLogs] = useState([]);
 
   useEffect(() => {
+    // Lenis smooth scrolling
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+
     const fetchDashboardData = async () => {
       try {
         const res = await axios.get('/api/tests/dashboard-stats');
