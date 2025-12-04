@@ -28,7 +28,7 @@ const Hero = () => {
     <>
       <section className="hero">
         <div className="hero-text">
-          <h1>Welcome to Muhafiz</h1>
+          <h1>Welcome to Kvizroom</h1>
           <TypeAnimation
             sequence={[
               'Seamless Exam Experience',
@@ -44,9 +44,7 @@ const Hero = () => {
             className="typing-text"
           />
         </div>
-      </section>
-
-      <section className="test-actions" id="create-test">
+        <section className="test-actions" id="create-test">
         <div className="test-container">
           <Link to="/create-test" className="btn shared-btn">Create Test</Link>
           <Link to="/admin" className="btn shared-btn">Admin Dashboard</Link>
@@ -54,6 +52,9 @@ const Hero = () => {
 
         </div>
       </section>
+      </section>
+
+      
 
     </>
   );

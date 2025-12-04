@@ -33,6 +33,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: black;
+  text-decoration: solid;
   font-family: 'Poppins', sans-serif;
   line-height: 1;
 }
@@ -61,7 +62,7 @@
   list-style: none;
   display: flex;
   gap: 2rem;
-  align-items:right;
+  align-items:center;
   margin: 0;
   padding: 0;
 }
@@ -137,28 +138,33 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  align-content: center;
 }
 
 .avatar-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  cursor: pointer;
+}
+
+.avatar-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .avatar-circle {
-  background-color: #007bff;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg,#4cafef,#6c5ce7);
   color: white;
+  font-weight: 700;
+  font-size: 18px;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 16px;
-  text-transform: uppercase;
+  user-select: none;
 }
-
-
-
 
