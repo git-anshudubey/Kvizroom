@@ -10,6 +10,7 @@
   font-size: 2rem;
   margin-bottom: 1rem;
   color: #064420;
+  padding-bottom: 8px;
 }
 
 .get-started p {
@@ -20,6 +21,7 @@
 
 .btn.green-btn {
   background-color: #008000;
+  border-radius: 50px;
   color: white;
   padding: 0.8rem 1.8rem;
   font-size: 1rem;
@@ -34,8 +36,10 @@
 
 .btn.green-btn:hover {
   background-color: #1b5e20;
-  transform: scale(1.05);
   box-shadow: 0 6px 14px rgba(27, 94, 32, 0.4);
+  transform: scale(1.07);
+  color: #e5efe5;
+  transition: all 0.3s ease;
 }
 
 
@@ -108,6 +112,12 @@
   justify-content: center;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+.integration-icon {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
 }
 
 
